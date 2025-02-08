@@ -1,11 +1,299 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+// import mugshot from "../assets/mees.png";
+import mugshot from "../assets/mugshot.png";
+import mugshotShadow from "../assets/mugshot-shadow.png";
+import construction from "../assets/under-construction.svg";
 ---
 
 <Layout>
-	<Welcome />
+  <div id="container">
+    <div>
+      <div class="mugshot-container">
+        <div class="mugshot-inner">
+          <div class="mugshot-background"></div>
+          <div class="mugshot-shadow-container">
+            <Image
+              class="mugshot-shadow"
+              alt=""
+              src={mugshotShadow}
+              width="400"
+              height="400"
+            />
+          </div>
+          <Image
+            class="mugshot-image"
+            src={mugshot}
+            alt="Mugshot"
+            width="390"
+            height="390"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <div style={{ width: "100%" }}>
+        <h1 class="intro">Mees van Wel</h1>
+        <div class="marquee">
+          <h2 class="marquee-text">Developer</h2>
+          <div class="marquee-dot">
+            <div class="marquee-sub-dot"></div>
+          </div>
+          <h2 class="marquee-text">Consultant</h2>
+          <div class="marquee-dot">
+            <div class="marquee-sub-dot"></div>
+          </div>
+          <h2 class="marquee-text">Entrepreneur</h2>
+        </div>
+      </div>
+      <div
+        style={{
+          textAlign: "center",
+          paddingBottom: "2rem",
+          fontSize: "1.5rem",
+        }}
+      >
+        <Image
+          class="construction"
+          src={construction}
+          alt="Construction"
+          width="300"
+        />
+        <h2>Under construction...</h2>
+      </div>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  const range = 12;
+  const maxOffset = 450;
+
+  const container = document.querySelector(".mugshot-container") as HTMLElement;
+  const background = document.querySelector(
+    ".mugshot-background"
+  ) as HTMLElement;
+  const shadowContainer = document.querySelector(
+    ".mugshot-shadow-container"
+  ) as HTMLElement;
+  const image = document.querySelector(".mugshot-image") as HTMLElement;
+
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+
+  const smoothMovement = () => {
+    currentX += (targetX - currentX) * 0.1;
+    currentY += (targetY - currentY) * 0.1;
+
+    image.style.transform = `translate(-50%, -50%) rotateX(${currentY * -5}deg) rotateY(${currentX * 5}deg)`;
+
+    shadowContainer.style.transform = `translate(-50%, -50%) rotateX(${currentY * -5}deg) rotateY(${currentX * 5}deg)`;
+    shadowContainer.style.top = `calc(50% + ${-currentY}rem)`;
+    shadowContainer.style.left = `calc(50% + ${-currentX}rem)`;
+    // shadowContainer.style.right = `${currentX}rem`;
+    // shadowContainer.style.bottom = `${currentY}rem`;
+
+    background.style.transform = `translate(-50%, -50%) rotateX(${currentY * -5}deg) rotateY(${currentX * 5}deg) translate(${-currentX}rem, ${currentY}rem)`;
+    background.style.top = `calc(50% + ${-currentY}rem)`;
+    background.style.left = `calc(50% + ${-currentX}rem)`;
+
+    // Request the next frame
+    requestAnimationFrame(smoothMovement);
+  };
+
+  addEventListener("mousemove", (e) => {
+    const rect = container.getBoundingClientRect();
+
+    const centerX = rect.left + container.offsetHeight / 2;
+    const centerY = rect.top + container.offsetHeight / 2;
+
+    const offsetX = e.clientX - centerX;
+    const offsetY = e.clientY - centerY;
+
+    const normalizedX = Math.min(Math.max(offsetX / maxOffset, -1), 1) * range;
+    const normalizedY = Math.min(Math.max(offsetY / maxOffset, -1), 1) * range;
+
+    const tooFar = !container.matches(":hover");
+    targetX = tooFar ? 0 : normalizedX;
+    targetY = tooFar ? 0 : normalizedY;
+  });
+
+  smoothMovement();
+
+  // Marquee
+  const marquee = document.querySelector(".marquee") as HTMLElement;
+  marquee.addEventListener("mouseover", () => {
+    marquee.classList.add("marquee-active");
+  });
+
+  document.addEventListener("mousedown", () => {
+    container.classList.add("mugshot-container-active");
+    marquee.classList.remove("marquee-active");
+  });
+
+  document.addEventListener("mouseup", () => {
+    container.classList.remove("mugshot-container-active");
+    marquee.classList.add("marquee-active");
+  });
+</script>
+
+<style>
+  #container {
+    display: flex;
+    /* min-height: 100vh; */
+
+    & > div:not(.line) {
+      flex: 1;
+    }
+  }
+
+  .line {
+    width: 1px;
+    background-color: rgb(var(--color-foreground));
+  }
+
+  .mugshot-container {
+    overflow: hidden;
+    box-shadow: inset 0px 0px 16px 0px rgba(0, 0, 0, 0.2);
+    height: calc(100vh - var(--size-header-height));
+    position: relative;
+    background-color: rgb(var(--color-text));
+  }
+
+  .mugshot-background {
+    position: absolute;
+    width: 3800px;
+    height: 3800px;
+    transform: translate(-50%, -50%);
+    background-image: url("/mugshot-background.png");
+    background-repeat: repeat;
+    background-size: 400px;
+    transition: scale 10s;
+    background-color: rgba(var(--color-background) / 0.9);
+
+    .mugshot-container:hover & {
+      scale: 1.1;
+    }
+  }
+
+  .mugshot-shadow-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(1, 103, 52, 0.2);
+    border-radius: 50%;
+    filter: blur(2px);
+    overflow: hidden;
+    width: 400px;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow:
+      inset 0px 0px 4px 0 rgba(0, 0, 0, 0.4),
+      0px 0px 16px 0 rgba(0, 0, 0, 0.4);
+    transition: width 300ms;
+
+    .mugshot-container-active & {
+      width: 450px;
+    }
+  }
+
+  .mugshot-shadow {
+    opacity: 0.2;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mugshot-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow:
+      inset 0px 0px 4px 2px rgba(0, 0, 0, 0.4),
+      0px 0px 16px 1px rgba(0, 0, 0, 0.4);
+    background-color: rgba(51, 153, 102, 0.2);
+    backdrop-filter: blur(6px);
+    border-radius: 50%;
+    user-select: none;
+    transition:
+      width 300ms,
+      height 300ms;
+
+    .mugshot-container-active & {
+      width: 350px;
+      height: 350px;
+    }
+  }
+
+  .intro {
+    margin: 2rem 0;
+    font-size: 4rem;
+    text-align: center;
+  }
+
+  .marquee {
+    /* font-family: monospace, monospace; */
+    letter-spacing: 0.25rem;
+    height: 3rem;
+    width: 100%;
+    border-top: solid 1px black;
+    border-bottom: solid 1px black;
+    background-color: rgba(1, 103, 52, 0.2);
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  .marquee-text {
+    margin: 0;
+    font-weight: 200 !important;
+  }
+
+  .marquee-dot {
+    width: 3rem;
+    height: 0;
+    /* aspect-ratio: 1; */
+    border: solid 1px rgb(var(--color-text));
+    border-radius: 50%;
+    transition:
+      width 200ms,
+      height 200ms;
+    position: relative;
+
+    .marquee-active & {
+      width: 3rem;
+      height: 2rem;
+      margin: -1px;
+    }
+  }
+
+  .marquee-sub-dot {
+    transition: background-color 200ms;
+    width: 0.5rem;
+    aspect-ratio: 1;
+    background-color: transparent;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+
+    .marquee-active & {
+      background-color: rgb(var(--color-text));
+    }
+  }
+</style>

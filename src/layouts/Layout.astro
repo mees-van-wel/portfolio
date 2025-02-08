@@ -1,22 +1,167 @@
+---
+import Icon from "../components/Icon.astro";
+import { getLangFromUrl, useTranslatedPath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(lang);
+const currentPath = Astro.url.pathname;
+---
+
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
+      rel="stylesheet"
+    />
+    <title>Mees van Wel</title>
+  </head>
+  <body>
+    <!-- <header id="header">
+      <div>
+        <a href="/" class="icon-link"><Icon /></a>
+      </div>
+      <nav id="navigation">
+        <a
+          class={currentPath === "/" ? "active" : undefined}
+          href={translatePath("/")}>Mees</a
+        >
+        <a
+          class={currentPath === "/portfolio/" ? "active" : undefined}
+          href={translatePath("/portfolio/")}>Portfolio</a
+        >
+        <a
+          class={currentPath === "/contact/" ? "active" : undefined}
+          href={translatePath("/contact/")}>Contact</a
+        >
+      </nav>
+      <div></div>
+    </header> -->
+    <main>
+      <slot />
+    </main>
+  </body>
 </html>
 
 <style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+  @font-face {
+    font-family: "NunitoSans";
+    font-style: normal;
+    font-weight: 200 1000;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url("/fonts/nunitoSansVariable.woff2") format("woff2");
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  @media (prefers-color-scheme: light) {
+    html {
+      --color-background: 255 255 255;
+      --color-foreground: 192 192 192;
+      --color-text: 0 0 0;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html {
+      --color-background: 0 0 0;
+      --color-foreground: 64 64 64;
+      --color-text: 255 255 255;
+    }
+  }
+
+  html.light {
+    --color-background: 255 255 255;
+    --color-foreground: 192 192 192;
+    --color-text: 0 0 0;
+  }
+
+  html.dark {
+    --color-background: 0 0 0;
+    --color-foreground: 64 64 64;
+    --color-text: 255 255 255;
+  }
+
+  html,
+  body {
+    overflow: hidden;
+
+    --size-header-height: 91px;
+
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-text));
+    font-family: "NunitoSans", serif;
+  }
+
+  #header {
+    width: 100%;
+    height: var(--size-header-height);
+    background: rgb(var(--color-background) / 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    z-index: 999;
+    border-bottom: solid 1px rgb(var(--color-foreground));
+    box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+
+    > * {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .icon-link {
+    text-decoration: none;
+    color: black;
+  }
+
+  #navigation {
+    justify-content: center;
+
+    > a {
+      letter-spacing: 1px;
+      color: rgb(var(--color-text));
+      text-decoration: none;
+      margin: 0 1rem;
+
+      &::after {
+        content: "";
+        display: block;
+        border-bottom: solid 1px black;
+        transition:
+          transform 0.3s ease,
+          margin 0.3s ease;
+        transform-origin: center;
+        transform: scaleX(0);
+      }
+
+      &:hover,
+      &.active {
+        &::after {
+          transform: scaleX(1.2);
+          margin-top: 0.5rem;
+        }
+      }
+    }
+  }
 </style>
